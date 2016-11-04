@@ -1,0 +1,6 @@
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+set(CMAKE_C_COMPILER /opt/tools/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux/bin/arm-linux-gnueabihf-gcc)
+set(CMAKE_CXX_COMPILER /opt/tools/gcc-linaro-arm-linux-gnueabihf-4.9-2014.09_linux/bin/arm-linux-gnueabihf-g++)
+set(CMAKE_INSTALL_PREFIX /home/hechuan/work/github/sk-linux-1.0/sys-root/install)
+set(CMAKE_FIND_ROOT_PATH /home/hechuan/work/github/sk-linux-1.0/sys-root)

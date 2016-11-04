@@ -1,0 +1,68 @@
+./configure  -xplatform xilinx_linux-arm-gnueabi-g++ \
+-prefix /home/hechuan/work/qt/qt5.6_install \
+-shared \
+-no-pkg-config \
+-opensource \
+-confirm-license \
+-no-c++11 \
+-no-opengl \
+-no-openssl \
+-no-xinput2 \
+-no-xcb-xlib \
+-no-glib	\
+-no-mtdev \
+-no-pch \
+-no-dbus \
+-no-xcb \
+-no-directfb \
+-no-kms \
+-optimized-qmake \
+-no-nis \
+-no-cups \
+-no-iconv \
+-no-gstreamer \
+-no-system-proxies \
+-no-egl \
+-no-eglfs \
+-no-opengl \
+-no-icu \
+-no-fontconfig \
+-no-qml-debug \
+-qt-libpng \
+-qt-libjpeg \
+-qt-freetype \
+-qt-harfbuzz \
+-qt-zlib \
+-linuxfb \
+-lrt \
+-force-asserts \
+-strip \
+-make libs \
+-skip qtdoc \
+-skip qttranslations \
+-skip qtwebengine	\
+-skip qtenginio	\
+-skip qtscript	\
+-skip qttools \
+-skip qtgraphicaleffects \
+-skip qtcanvas3d \
+-skip qt3d \
+-skip qtdeclarative \
+-skip qtandroidextras \
+-skip qtwebchannel \
+-skip qtmacextras  \
+-skip qtwinextras \
+-skip qtlocation \
+-skip qtconnectivity \
+-skip qtsvg \
+-skip qtmultimedia \
+-nomake tests \
+-nomake libs \
+-nomake tools \
+-qreal float \
+-verbose \
+-sysroot /home/hechuan/work/zynq/petalinux/test/Avnet-Digilent-ZedBoard-2016.2/build/linux/rootfs/stage/
+
+#-no-compile-examples 
+#-nomake examples \
+
