@@ -27,4 +27,7 @@ dtb:
 	make -C $(KERNEL_DTB_DIR) dtb
 dts:
 	make -C $(KERNEL_DTB_DIR) dts
+
+rootfs_img:
+	mkfs.ubifs -m 2048 -e 126KiB -c 500 -r $(PUB_ROOTBOX) ubifs.img
 		

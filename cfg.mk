@@ -3,7 +3,10 @@
 ifeq ($(ROOT_DIR), )
     $(error "please source env-setup.sh in root dir")
 endif
-$(warning rootdir = $(ROOT_DIR))
+#$(warning rootdir = $(ROOT_DIR))
+
+#to silent receipt echo
+Q=@
 
 TOP_DIR=$(ROOT_DIR)
 ROOTFS_SRC_DIR=${ROOT_DIR}/rootfs
@@ -20,8 +23,14 @@ PETALINUX_DIR=$(ROOT_DIR)/petalinux
 
 #boot directory 
 #the long dir is kept as original that was downloaded from digilent offcial site
-BOOT_DIR=u-boot-digilent-digilent-v2016.07
-BOOT_DIR_SHORT=digilent-v2016.07
+
+#BOOT_DIR=u-boot-digilent-digilent-v2016.07
+#BOOT_DIR_SHORT=digilent-v2016.07
+
+BOOT_DIR=u-boot-xlnx-xilinx-v2016.3
+BOOT_DIR_SHORT=xilinx-v2016.3
+
+BOOT_PAT_DIR=$(PATCH_DIR)/uboot/$(BOOT_DIR_SHORT)
 
 #kernel branch from analog
 KERNEL_BRA=linux-xcomm_zynq

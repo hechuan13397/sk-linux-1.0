@@ -29,7 +29,7 @@
 #include <linux/io.h>
 
 //#define IIC_LOOP_TEST
-//#define IIC_TURN_OFF
+#define IIC_TURN_OFF
 #define WITH_SUBDEV
 
 #define KER_LOG(formt,args...)         printk(KERN_ERR"%s-%d"formt,__FUNCTION__,__LINE__,##args);

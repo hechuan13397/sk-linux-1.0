@@ -1,6 +1,15 @@
 
 include cfg.mk
 
+define GIT_PREPARE =
+git init ;\
+git add . ;\
+git add .config -f ;\
+git commit -m "init version" ;\
+git config core.fileMode false ;
+endef
+
+
 PETALINUX_STAGE=$(ROOT_DIR)/petalinux/pre-build/linux/rootfs/stage
 
 
@@ -30,7 +39,7 @@ purge-confirm:
 #                          boot
 #====================================================================================
 
-.PHONY: boot-prepare boot-patch boot boot-install boot-clean boot-distclean boot-purge boot-img
+.PHONY: boot-prepare boot-git-pre boot-patch boot boot-install boot-clean boot-distclean boot-purge boot-img
 boot-prepare:
 	test -d $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT) || tar -xvf $(TOP_DIR)/source/$(BOOT_DIR).tar.gz -C $(TOP_DIR)/uboot; \
     	cd uboot; \
@@ -38,11 +47,15 @@ boot-prepare:
 		mv $(BOOT_DIR) $(BOOT_DIR_SHORT); \
 	fi
 boot-git-pre:
+	if [ ! -d uboot/$(BOOT_DIR_SHORT)/.git ];then\
+	 	cd uboot/$(BOOT_DIR_SHORT) ;\
+		$(GIT_PREPARE) \
+	fi
 
 boot-patch:
-	cp -arvf $(PATCH_DIR)/uboot/. $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT)
+	cp -arvf $(BOOT_PAT_DIR)/. $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT)
 boot:
-	make -C $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT)
+	make -C $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT) -j 4
 
 #this is only for test. 
 #it's need to set nfs rootfs/home dir to copy boot to sd 
@@ -61,12 +74,18 @@ boot-purge:
 #====================================================================================
 #                          kernel
 #====================================================================================
-.PHONY: kernel-prepare kernel-patch kernel kernel-install kernel-clean kernel-distclean kernel-purge
+.PHONY: kernel-prepare kernel-git-pre  kernel-patch kernel kernel-install kernel-clean kernel-distclean kernel-purge
 
 kernel-prepare:
 	test -d $(TOP_DIR)/kernel/$(KERNEL_BRA) || unzip $(TOP_DIR)/source/$(KERNEL_BRA)-$(KERNEL_COMMIT).zip -d $(TOP_DIR)/kernel;
+kernel-git-pre:
+	if [ ! -d kernel/$(KERNEL_BRA)/.git ];then\
+	 	cd kernel/$(KERNEL_BRA);\
+		$(GIT_PREPARE) \
+	fi
 kernel-patch:
 	cp -arvf $(PATCH_DIR)/kernel/. $(TOP_DIR)/kernel/$(KERNEL_BRA)
+
 kernel:
 	make -C $(TOP_DIR)/kernel/$(KERNEL_BRA) -j 4
 

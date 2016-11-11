@@ -182,7 +182,7 @@ QV4L2_RET QV4l2Cap_ReleaseFrame()
 		return QV4L2_FAIL;
 	}
 	videobuf->ishold = QV4L_FALSE;
-	return;
+	return QV4L2_SUCCESS;
 }
 
 QV4L2_RET QV4l2Cap_Stop()

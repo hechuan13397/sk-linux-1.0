@@ -3,6 +3,10 @@
 #ifndef QT_V4L2_CAP_H
 #define QT_V4L2_CAP_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	QV4L2_CAP_IMG_RGBA = 0,
 }QV4L2_CAP_IMG_FORMAT;
@@ -61,7 +65,7 @@ QV4L2_RET QV4l2Cap_ObtainFrame(strFrameBuf *buf);
 	release a frame after using.
 	
 */
-QV4L2_RET QV4l2Cap_FrameRelease();
+QV4L2_RET QV4l2Cap_ReleaseFrame();
 
 /*
 	stop to capture camera image
@@ -73,6 +77,10 @@ QV4L2_RET QV4l2Cap_Stop();
 	qt v4l2 capture deinit
 */
 QV4L2_RET QV4l2Cap_deinit();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
