@@ -18,6 +18,7 @@ SKDRV_DIR=$(ROOT_DIR)/sk-drv
 PATCH_DIR=${ROOT_DIR}/patch
 ROOTBOX_PATCH_DIR=$(PATCH_DIR)/rootfs
 SYS_ROOT_DIR=$(ROOT_DIR)/sys-root
+INSTALL_DIR = $(ROOT_DIR)/sys-root/install
 SOURCE_DIR=$(ROOT_DIR)/source
 PETALINUX_DIR=$(ROOT_DIR)/petalinux
 

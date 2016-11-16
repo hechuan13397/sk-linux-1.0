@@ -4,7 +4,6 @@
 
 include ../cfg.mk
 
-INSTALL_DIR = $(ROOT_DIR)/sys-root/install
 
 #qt variable
 QT_DIR = qt-everywhere-opensource-src-5.6.0
@@ -25,11 +24,15 @@ GPHOTO_DIR = libgphoto2-2.5.10
 LIBTOOL_DIR = libtool-2.4.2
 LIBUSB_DIR = libusb-1.0.18
 
+#libtslib dir variable
+TSLIB_DIR = tslib-1.1
+
 
 #all project do real make
 .PHONY: qt qwt ffmpeg libtool libusb gphoto
-all: qt qwt ffmpeg libtool libusb gphoto
-qt:
+all: tslib qt qwt ffmpeg libtool libusb gphoto
+
+qt: tslib-install
 	make -C $(QT_DIR) -j 4
 qwt:
 	make -C $(QWT_DIR) -j 4
@@ -41,6 +44,8 @@ libusb:
 	make -C $(LIBUSB_DIR)
 gphoto:
 	make -C $(GPHOTO_DIR)
+tslib:
+	make -C $(TSLIB_DIR)
 	
 #all top make command
 .PHONY: prepare config patch all install clean distclean purge test
@@ -55,9 +60,9 @@ test:
 	@echo "reply confirmed ok"
 
 #all project prepare
-.PHONY: qt-prepare qwt-prepare ffmpeg-prepare libtool-prepare libusb-prepare gphoto-prepare
-	
-prepare: qt-prepare qwt-prepare ffmpeg-prepare libtool-prepare libusb-prepare gphoto-prepare
+.PHONY: tslib-prepare qt-prepare qwt-prepare ffmpeg-prepare libtool-prepare libusb-prepare gphoto-prepare
+prepare: tslib-prepare qt-prepare qwt-prepare ffmpeg-prepare libtool-prepare libusb-prepare gphoto-prepare
+
 ffmpeg-prepare:
 	test -d $(FFMPEG_DIR) || tar -xvf $(SOURCE_DIR)/$(FFMPEG_DIR).tar.bz2
 qt-prepare:
@@ -70,10 +75,13 @@ libtool-prepare:
 	test -d $(LIBTOOL_DIR) || tar -xvf $(SOURCE_DIR)/$(LIBTOOL_DIR).tar.gz
 libusb-prepare:
 	test -d $(LIBUSB_DIR) || tar -xvf $(SOURCE_DIR)/$(LIBUSB_DIR).tar.bz2
+tslib-prepare:
+	test -d $(TSLIB_DIR) || tar -xvf $(SOURCE_DIR)/$(TSLIB_DIR).tar.gz
 
 #all project patch
 .PHONY: qt-patch qwt-patch
 patch: qt-patch qwt-patch
+
 qt-patch:
 	echo "$(PATCH_DIR)"
 	test ! -d $(PATCH_DIR)/qt/$(QT_DIR) || \
@@ -86,9 +94,13 @@ qwt-patch:
 
 	
 #all project config
-.PHONY: qt-config qwt-config ffmpeg-config libtool-config libusb-config gphoto-config
-config: qt-config qwt-config ffmpeg-config libtool-config libusb-config gphoto-config
+.PHONY: tslib-config qt-config qwt-config ffmpeg-config libtool-config libusb-config gphoto-config
+config: tslib-config qt-config qwt-config ffmpeg-config libtool-config libusb-config gphoto-config
 
+tslib-config:
+	cd $(TSLIB_DIR); \
+	autoreconf -vfi; \
+	./configure --prefix=$(INSTALL_DIR) --host=$(CROSS_HOST)
 libtool-config:
 	cd $(LIBTOOL_DIR); \
 	./configure --prefix=$(INSTALL_DIR) --host=$(CROSS_HOST)
@@ -111,8 +123,18 @@ ffmpeg-config:
 	--disable-avfilter --disable-encoders --disable-hwaccels --disable-muxers --disable-bsfs --disable-protocols \
 	--disable-outdevs --disable-filters --disable-parsers 
 
-#-sysroot $(SYS_ROOT_DIR)
-#-verbose
+
+QT_VERBOSE=yes
+
+ifeq ($(QT_VERBOSE),yes)
+QT_LOG=-verbose
+else
+QT_LOG=-silent
+endif
+
+#-qreal float
+#-make libs \
+
 qt-config:
 	cd $(QT_DIR);\
 	./configure -xplatform xilinx-arm-linux-gnueabihf-g++ \
@@ -122,8 +144,7 @@ qt-config:
 	-no-glib -no-mtdev -no-pch -no-dbus -no-xcb -no-directfb -no-kms \
 	-optimized-qmake -no-nis -no-cups -no-iconv -no-gstreamer -no-system-proxies \
 	-no-egl -no-eglfs -no-opengl -no-icu -no-fontconfig -no-qml-debug -qt-libpng -qt-libjpeg \
-	-qt-freetype -qt-harfbuzz -qt-zlib -linuxfb -lrt -force-asserts -strip \
-	-make libs \
+	-qt-freetype -qt-harfbuzz -qt-zlib -linuxfb -lrt -force-asserts -strip -tslib \
 	-skip qtdoc \
 	-skip qttranslations \
 	-skip qtwebengine	\
@@ -142,18 +163,19 @@ qt-config:
 	-skip qtconnectivity \
 	-skip qtmultimedia \
 	-nomake tests \
-	-nomake libs \
 	-nomake tools \
-	-qreal float \
-	-silent
+	-nomake examples \
+	-I$(QT_INSTALL_DIR)/include \
+	-L$(QT_INSTALL_DIR)/lib \
+	$(QT_LOG)
 
 qwt-config:
 	cd $(QWT_DIR);\
 	$(QMAKE_BIN) qwt.pro
 	
 #all project install
-.PHONY: qt-install qwt-install ffmpeg-install libtool-install libusb-install gphoto-install
-install: qt-install qwt-install ffmpeg-install libtool-install libusb-install gphoto-install
+.PHONY: tslib-install qt-install qwt-install ffmpeg-install libtool-install libusb-install gphoto-install
+install: tslib-install qt-install qwt-install ffmpeg-install libtool-install libusb-install gphoto-install
 qt-install:
 	make -C $(QT_DIR) install
 qwt-install:
@@ -166,10 +188,11 @@ libusb-install:
 	make -C $(LIBUSB_DIR) install
 gphoto-install:
 	make -C $(GPHOTO_DIR) install
-
+tslib-install:
+	make -C $(TSLIB_DIR) install
 #all project clean
-.PHONY: qt-clean qwt-clean ffmpeg-clean libtool-clean libusb-clean gphoto-clean
-clean: qt-clean qwt-clean ffmpeg-clean libtool-clean libusb-clean gphoto-clean
+.PHONY: tslib-clean qt-clean qwt-clean ffmpeg-clean libtool-clean libusb-clean gphoto-clean
+clean: tslib-clean qt-clean qwt-clean ffmpeg-clean libtool-clean libusb-clean gphoto-clean
 
 qt-clean:
 	make -C $(QT_DIR) clean
@@ -183,6 +206,8 @@ libusb-clean:
 	make -C $(LIBUSB_DIR) clean
 gphoto-clean:
 	make -C $(GPHOTO_DIR) clean
+tslib-clean:
+	make -C $(TSLIB_DIR) clean
 
 #all project distclean
 .PHONY: qt-distclean qwt-distclean ffmpeg-distclean libtool-distclean libusb-distclean gphoto-distclean
@@ -200,11 +225,14 @@ libusb-distclean:
 	make -C $(LIBUSB_DIR) distclean
 gphoto-distclean:
 	make -C $(GPHOTO_DIR) distclean
-
+tslib-distclean:
+	make -C $(TSLIB_DIR) distclean
 #all project purge
-.PHONY: qt-purge qwt-purge ffmpeg-purge libtool-purge libusb-purge gphoto-purge
-purge: qt-purge qwt-purge ffmpeg-purge libtool-purge libusb-purge gphoto-purge
+.PHONY: tslib-purge qt-purge qwt-purge ffmpeg-purge libtool-purge libusb-purge gphoto-purge
+purge: tslib-purge qt-purge qwt-purge ffmpeg-purge libtool-purge libusb-purge gphoto-purge
 
+tslib-purge:
+	rm -rf $(TSLIB_DIR)	
 qt-purge:
 	rm -rf $(QT_DIR) 
 qwt-purge:

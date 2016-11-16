@@ -18,7 +18,7 @@ PETALINUX_STAGE=$(ROOT_DIR)/petalinux/pre-build/linux/rootfs/stage
 .PHONY: build prepare patch all clean distclean install purge help
 all: boot kernel rootfs component
 build: prepare patch config
-prepare: boot-prepare kernel-prepare rootfs-prepare component-prepare 
+prepare: dir-prepare boot-prepare kernel-prepare rootfs-prepare component-prepare 
 patch: boot-patch kernel-patch rootfs-patch component-patch 
 config: rootfs-config component-config
 clean: boot-clean kernel-clean rootfs-clean component-clean
@@ -26,7 +26,7 @@ distclean: boot-distclean kernel-distclean rootfs-distclean component-distclean
 install: boot-install kernel-install rootfs-install  component-install rootbox-install 
 purge: purge-confirm boot-purge kernel-purge rootfs-purge component-purge drv-purge rootbox-purge 
 
-.PHONY: purge-confirm
+.PHONY: purge-confirm dir-prepare
 purge-confirm:
 	read -p "Are you sure you to rm all project[yes/no]?" REPLY; \
 	if [ "$$REPLY" != "yes" ]; then \
@@ -34,6 +34,9 @@ purge-confirm:
 	else \
 		echo "continue to start"; \
 	fi
+
+dir-prepare:
+	mkdir -p $(INSTALL_DIR)	
 
 #====================================================================================
 #                          boot
@@ -169,7 +172,8 @@ rootbox-install: rootfs-install rootfs-cp drv-install
 rootbox-purge:
 	rm -rf $(PUB_ROOTBOX)
 	rm -rf $(ROOT_DEVEL_DIR)
-
+	rm -rf $(INSTALL_DIR)
+	
 #====================================================================================
 #                         component
 #====================================================================================
