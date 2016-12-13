@@ -16,7 +16,7 @@
 #include <stddef.h>
 #include <linux/fb.h>
 
-#include "qt_v4l2_cap.h"
+#include "sk_v4l2cap.h"
 
 static struct fb_var_screeninfo var;
 static struct fb_fix_screeninfo fix;
@@ -34,7 +34,7 @@ static void setTTYCursor(int enable)
             const char *termctl = enable ? "\033[9;15]\033[?33h\033[?25h\033[?0c" : "\033[9;0]\033[?33l\033[?25l\033[?1c";
             write(fd, termctl, strlen(termctl) + 1);
             close(fd);
-			printf("tty device name = %s\n",dev);
+			printf("tty device name = %s\n",*dev);
             return;
         }
     }
@@ -170,7 +170,8 @@ int display_frame_on_fb0(unsigned char *input_frame,int frame_len,int width,int 
 		for (j = 0; j < width; j++){
 			int pixel_invert = *rgbframe_tmp++;
 			pixel_invert = Tranverse32(pixel_invert);
-			pixel_invert|=0xff000000;
+			//pixel_invert|=0xff000000;
+			//pixel_invert <<= 8;
 			draw_pixel(fbmem,j,i,pixel_invert);
 		}
 	}
@@ -187,6 +188,8 @@ int main(int argc, char **argv)
 	strFrameBuf  framebuf;
 	QV4L2_RET ret = 0;
 	int cnt = 0;
+
+	setTTYCursor(0);
 	
 	QV4l2Cap_init();
 	
@@ -195,7 +198,9 @@ int main(int argc, char **argv)
 			printf("QV4l2Cap_Start failed\n");
 			return 0;
 	}
-	
+
+	QV4l2Cap_CameraSet(500);
+
 	while (1){
 		
 		ret = QV4l2Cap_ObtainFrame(&framebuf);

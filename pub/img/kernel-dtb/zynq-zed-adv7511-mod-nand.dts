@@ -1,5 +1,11 @@
 /dts-v1/;
 
+/* copy from linux header file for device tree
+
+#define GPIO_ACTIVE_HIGH 	0
+#define GPIO_ACTIVE_LOW 	1
+*/
+
 / {
 	#address-cells = <0x1>;
 	#size-cells = <0x1>;
@@ -766,4 +772,43 @@
 		label = "nand-bitstream";
 		reg = <0xC00000 0x400000>;
 	};
+};
+
+/*add for uio test*/
+&fpga_axi {
+
+	vdma@83000000 {
+		compatible = "dmem-uio";
+		reg = <0x83000000 0x6000>;
+	};
+
+	vtc@83c00000 {
+		compatible = "dmem-uio";
+		reg = <0x83c00000 0x6000>;
+	};
+
+	ad9361@79020000 {
+		compatible = "dmem-uio";
+		reg = <0x83c10000 0x6000>;
+	};
+
+	rx_dma@7c400000 {
+		compatible = "dmem-uio";
+		reg = <0x7c400000 0x10000>;
+		uio,number-of-dynamic-regions = <1>;
+		uio,dynamic-regions-sizes = <262144>;
+	};
+
+};
+
+&i2c1 {
+	tsc2007@49 { 
+		compatible = "ti,tsc2007";
+		reg = <0x49>;
+		interrupt-parent = <&gpio0>;
+		interrupts = <57 8>;
+		gpios = <&gpio0 57 1>;
+		ti,x-plate-ohms = <180>; 
+		ti,poll-period = /bits/ 64 <30>; //in ms
+	}; 
 };

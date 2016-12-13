@@ -28,11 +28,13 @@
 #include <media/v4l2-ctrls.h>
 #include <linux/io.h>
 
+
+//#define LINUX_IO_TEST
 //#define IIC_LOOP_TEST
-#define IIC_TURN_OFF
+//#define IIC_TURN_OFF
 #define WITH_SUBDEV
 
-#define KER_LOG(formt,args...)         printk(KERN_ERR"%s-%d"formt,__FUNCTION__,__LINE__,##args);
+#define KER_LOG(formt,args...)         printk(KERN_INFO"%s-%d :: "formt,__FUNCTION__,__LINE__,##args);
 
 
 /*
@@ -540,7 +542,11 @@ static int mt9m001_s_ctrl(struct v4l2_ctrl *ctrl)
 
 			dev_dbg(&client->dev, "Setting gain from %d to %d\n",
 				 reg_read(client, MT9M001_GLOBAL_GAIN), data);
+			KER_LOG("data = %d\n",data);
+			//data = 0x30;
 			data = reg_write(client, MT9M001_GLOBAL_GAIN, data);
+			//data = reg_write(client, MT9M001_SHUTTER_WIDTH, 0x800);
+
 			if (data < 0)
 				return -EIO;
 		}
@@ -555,6 +561,7 @@ static int mt9m001_s_ctrl(struct v4l2_ctrl *ctrl)
 			dev_dbg(&client->dev,
 				"Setting shutter width from %d to %lu\n",
 				reg_read(client, MT9M001_SHUTTER_WIDTH), shutter);
+			KER_LOG("Setting shutter width from %d to %lu\n",reg_read(client, MT9M001_SHUTTER_WIDTH), shutter);
 			if (reg_write(client, MT9M001_SHUTTER_WIDTH, shutter) < 0)
 				return -EIO;
 		} else {
@@ -566,6 +573,11 @@ static int mt9m001_s_ctrl(struct v4l2_ctrl *ctrl)
 				return -EIO;
 		}
 		return 0;
+		//add by hechuan for test
+	case V4L2_CID_GAMMA:
+		KER_LOG("V4L2_CID_GAMMA control value = %d\n",ctrl->val);
+		return 0;
+		
 	}
 	return -EINVAL;
 }
@@ -597,6 +609,21 @@ static int mt9m001_video_probe(struct soc_camera_subdev_desc *ssdd,
 	} 
 	
 #endif	
+
+#ifdef  LINUX_IO_TEST
+		char * vir_test = ioremap(0x83c10000, 1024*1024);
+
+		for (;i < 100;i++){
+		writel(1,vir_test);
+		writel(0,vir_test+4);
+		KER_LOG("read 0x83c10000 = 0x%x\n",readl(vir_test));
+		KER_LOG("read 0x83c10004 = 0x%x\n",readl(vir_test+4));
+		mdelay(500);
+	} 
+	
+	iounmap(vir_test);
+
+#endif
 
 	/* Enable the chip */
 	data = reg_write(client, MT9M001_CHIP_ENABLE, 1);
@@ -664,7 +691,6 @@ static int mt9m001_video_probe(struct soc_camera_subdev_desc *ssdd,
 
 done:
 	mt9m001_s_power(&mt9m001->subdev, 0);
-	KER_LOG("ret = %d\n",ret);
 	return ret;
 }
 
@@ -914,9 +940,11 @@ static int mt9m001_probe(struct i2c_client *client,
 	v4l2_ctrl_new_std(&mt9m001->hdl, &mt9m001_ctrl_ops,
 			V4L2_CID_VFLIP, 0, 1, 1, 0);
 	v4l2_ctrl_new_std(&mt9m001->hdl, &mt9m001_ctrl_ops,
-			V4L2_CID_GAIN, 0, 127, 1, 64);
+			V4L2_CID_GAIN, 0, 1270, 1, 64);
 	mt9m001->exposure = v4l2_ctrl_new_std(&mt9m001->hdl, &mt9m001_ctrl_ops,
 			V4L2_CID_EXPOSURE, 1, 255, 1, 255);
+	//add for register write
+	v4l2_ctrl_new_std(&mt9m001->hdl, &mt9m001_ctrl_ops,V4L2_CID_GAMMA , 1, 0xffffffff, 1, 255);
 	/*
 	 * Simulated autoexposure. If enabled, we calculate shutter width
 	 * ourselves in the driver based on vertical blanking and frame width
@@ -924,6 +952,7 @@ static int mt9m001_probe(struct i2c_client *client,
 	mt9m001->autoexposure = v4l2_ctrl_new_std_menu(&mt9m001->hdl,
 			&mt9m001_ctrl_ops, V4L2_CID_EXPOSURE_AUTO, 1, 0,
 			V4L2_EXPOSURE_AUTO);
+	
 	mt9m001->subdev.ctrl_handler = &mt9m001->hdl;
 	if (mt9m001->hdl.error)
 		return mt9m001->hdl.error;
@@ -945,13 +974,11 @@ static int mt9m001_probe(struct i2c_client *client,
 		goto eclkget;
 	}
 #endif
-
 	mt9m001->subdev.dev = &client->dev;
 	ret = v4l2_async_register_subdev(&mt9m001->subdev);
 	if (ret < 0){
 		KER_LOG("failed\n");
 	}
-
 	ret = mt9m001_video_probe(ssdd, client);
 
 	if (ret) {

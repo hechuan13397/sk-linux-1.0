@@ -32,7 +32,7 @@ TSLIB_DIR = tslib-1.1
 .PHONY: qt qwt ffmpeg libtool libusb gphoto
 all: tslib qt qwt ffmpeg libtool libusb gphoto
 
-qt: tslib-install
+qt: 
 	make -C $(QT_DIR) -j 4
 qwt:
 	make -C $(QWT_DIR) -j 4
@@ -135,7 +135,7 @@ endif
 #-qreal float
 #-make libs \
 
-qt-config:
+qt-config: tslib-install
 	cd $(QT_DIR);\
 	./configure -xplatform xilinx-arm-linux-gnueabihf-g++ \
 	-prefix $(QT_INSTALL_DIR) \

@@ -27,7 +27,6 @@ BUILD_OBJS = $(addprefix $(OBJ_DIR),$(MOD_OBJS))
 BUILD_DEPS = $(addprefix $(DEPEND_DIR),$(DEP_FILES))
 
 KERNEL_PATH = $(ROOT_DIR)/kernel/$(KERNEL_BRA)
-MAIN_INSTALL = $(NFS_BOOT)/rootbox/home/root
 
 INCDIR = -I$(ROOT_DEVEL_DIR)/usr/include
 INCDIR += -I$(KERNEL_PATH)/include/uapi

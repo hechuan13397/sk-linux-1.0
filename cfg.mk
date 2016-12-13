@@ -1,3 +1,12 @@
+#cross compiler define
+CROSS=arm-linux-gnueabihf-
+CC=${CROSS}gcc
+CC_PLUS=${CROSS}g++
+AR=${CROSS}ar
+LD=${CROSS}ld
+OC=${CROSS}objcopy
+RANLIB=${CROSS}ranlib
+RM=rm
 
 #global variable
 ifeq ($(ROOT_DIR), )

@@ -2,19 +2,20 @@
 
 
 Session.vim
-app/
-component/
-kernel/
-petalinux/
-pub/
-rootfs/
-source-read/
-source/
-sys-root/
-tools/
-uboot/
+app/*
+component/*
+kernel/*
+petalinux/*
+pub/*
+rootfs/*
+source-read/*
+source/*
+sys-root/*
+tools/*
+uboot/*
 
 *.[do]
 *.a
 *.swp
 sk_v4l2test
+sk_uiotest

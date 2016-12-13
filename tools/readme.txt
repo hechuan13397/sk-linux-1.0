@@ -13,3 +13,7 @@ bacup git stage difference with one special commit to dest dir
 gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf.tar.xz
 --------------------------------------------------------
 http://releases.linaro.org/components/toolchain/binaries/4.9-2016.02/arm-linux-gnueabihf/ 
+
+gdb-7.5.tar.gz
+--------------
+https://ftp.gnu.org/gnu/gdb/

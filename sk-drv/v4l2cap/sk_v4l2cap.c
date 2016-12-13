@@ -71,6 +71,17 @@ void QV4l2Cap_SetImgFormat(QV4L2_CAP_IMG_FORMAT format)
 	return;
 }
 
+#if 1
+void QV4l2Cap_CameraSet(int value)
+{
+	v4l2_mt9m_set_ctrl(V4L2_CID_GAIN, value);
+	v4l2_mt9m_set_ctrl(V4L2_CID_EXPOSURE_AUTO, 0);
+
+	//v4l2_mt9m_set_ctrl(V4L2_CID_TEST_PATTERN, 100);
+	return; 
+}
+#endif
+
 QV4L2_RET QV4l2Cap_Start()
 {
 	int ret = 0,i = 0,j=0;

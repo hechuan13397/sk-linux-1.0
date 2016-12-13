@@ -132,7 +132,6 @@ certs/
 crypto/
 firmware/
 fs/
-include/
 init/
 ipc/
 kernel/

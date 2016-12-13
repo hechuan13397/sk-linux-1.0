@@ -10,10 +10,12 @@ BOOT_ENV_TXT=$(BOOT_ENV).txt
 BOOT_ENV_IMG=$(BOOT_ENV).img
 BOOT_COMPONENT_DIR=$(PUB_IMG_DIR)/plbit
 KERNEL_DTB_DIR=kernel-dtb
+LOGO_NAME=sk_log.png
 
 #petalinux project directory
 PETA_PROJECT_TMP=$(PETALINUX_DIR)/peta-zynq-tmp
-.PHONY:boot_env boot_img dtb dts
+.PHONY:boot_env boot_img dtb dts kernel_logo
+
 boot_env:
 	mkimage -T script -C none -n 'Demo Script File' -d $(BOOT_ENV_TXT) $(BOOT_ENV_IMG)
 	cp -vf $(BOOT_ENV_IMG) $(TFTP_HOST)
@@ -31,3 +33,6 @@ dts:
 rootfs_img:
 	mkfs.ubifs -m 2048 -e 126KiB -c 500 -r $(PUB_ROOTBOX) ubifs.img
 		
+kernel_logo:
+	pngtopnm $(LOGO_NAME) | ppmquant 224 | pnmtoplainpnm > logo_linux_clut224.ppm
+
