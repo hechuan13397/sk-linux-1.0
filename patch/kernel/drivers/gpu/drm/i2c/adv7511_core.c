@@ -978,6 +978,8 @@ static const int edid_i2c_addr = 0x7e;
 static const int packet_i2c_addr = 0x70;
 static const int cec_i2c_addr = 0x78;
 
+#define KER_LOG(formt,args...)         printk(KERN_INFO"%s-%d :: "formt,__FUNCTION__,__LINE__,##args);
+
 static int adv7511_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 {
 	struct adv7511_link_config link_config;
@@ -1020,20 +1022,37 @@ static int adv7511_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 		return PTR_ERR(adv7511->regmap);
 
 	ret = regmap_read(adv7511->regmap, ADV7511_REG_CHIP_REVISION, &val);
+	KER_LOG("ret = %d,val = %d\n",ret,val);
 	if (ret)
 		return ret;
 	dev_dbg(dev, "Rev. %d\n", val);
 
+#if 1
 	ret = regmap_register_patch(adv7511->regmap, adv7511_fixed_registers,
 				    ARRAY_SIZE(adv7511_fixed_registers));
+	
+	KER_LOG("ret = %d\n",ret);
 	if (ret)
 		return ret;
+#endif
+	int i = 0;
+	unsigned int iic_test = edid_i2c_addr;
 
-	regmap_write(adv7511->regmap, ADV7511_REG_EDID_I2C_ADDR, edid_i2c_addr);
-	regmap_write(adv7511->regmap, ADV7511_REG_PACKET_I2C_ADDR,
+#if 0
+	for (i = 0; i<100; i++){
+	ret = regmap_write(adv7511->regmap, ADV7511_REG_EDID_I2C_ADDR, iic_test++);
+	KER_LOG("ret = %d,write_val = %d\n",ret,iic_test-1);
+	ret = regmap_read(adv7511->regmap, ADV7511_REG_EDID_I2C_ADDR, &val);
+	KER_LOG("ret = %d,read val = %d\n",ret,val);
+	mdelay(500);
+	}
+#endif
+
+	ret = regmap_write(adv7511->regmap, ADV7511_REG_PACKET_I2C_ADDR,
 		     packet_i2c_addr);
-	regmap_write(adv7511->regmap, ADV7511_REG_CEC_I2C_ADDR, cec_i2c_addr);
+	ret = regmap_write(adv7511->regmap, ADV7511_REG_CEC_I2C_ADDR, cec_i2c_addr);
 	adv7511_packet_disable(adv7511, 0xffff);
+	KER_LOG("ret = %d\n",ret);
 
 	adv7511->i2c_main = i2c;
 	adv7511->i2c_edid = i2c_new_dummy(i2c->adapter, edid_i2c_addr >> 1);
@@ -1048,6 +1067,8 @@ static int adv7511_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
 						adv7511_irq_handler,
 						IRQF_ONESHOT, dev_name(dev),
 						adv7511);
+		
+		KER_LOG("ret = %d\n",ret);
 		if (ret)
 			goto err_i2c_unregister_device;
 

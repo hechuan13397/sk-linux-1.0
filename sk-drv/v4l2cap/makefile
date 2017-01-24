@@ -28,7 +28,7 @@ BUILD_DEPS = $(addprefix $(DEPEND_DIR),$(DEP_FILES))
 
 KERNEL_PATH = $(ROOT_DIR)/kernel/$(KERNEL_BRA)
 
-INCDIR = -I$(ROOT_DEVEL_DIR)/usr/include
+INCDIR = -I$(BUILDROOT_STAGE)/usr/include
 INCDIR += -I$(KERNEL_PATH)/include/uapi
 INCDIR += -I$(KERNEL_PATH)/include
 INCDIR += -I./include
@@ -60,8 +60,8 @@ $(BUILD_OBJS): $(OBJ_DIR)%.o : %.c
 	@$(CC) $(CFLAGS) $(INCDIR) -o $@  -c $<
 
 install: $(MOD_NAME_LIB)
-	@cp -vf $(PUBINC) $(ROOT_DEVEL_DIR)/usr/include/
-	@cp -vf $(PUB_STATICLIB) $(ROOT_DEVEL_DIR)/usr/sklib/
+	@cp -vf $(PUBINC) $(BUILDROOT_STAGE)/usr/include/
+	@cp -vf $(PUB_STATICLIB) $(BUILDROOT_STAGE)/usr/sklib/
 clean:
 	$(RM) -f $(BUILD_DEPS)
 	$(RM) -f $(BUILD_OBJS)

@@ -1924,7 +1924,7 @@ static struct drm_display_mode *drm_mode_detailed(struct drm_device *dev,
 	if (hactive < 64 || vactive < 64)
 		return NULL;
 
-	//hactive = 800;vactive = 200;
+	//hactive = 1280;vactive = 720;
 	KER_LOG("hactive = %d,vactive = %d\n",hactive,vactive);
 	
 	if (pt->misc & DRM_EDID_PT_STEREO) {

@@ -9,40 +9,18 @@ git commit -m "init version" ;\
 git config core.fileMode false ;
 endef
 
-
-PETALINUX_STAGE=$(ROOT_DIR)/petalinux/pre-build/linux/rootfs/stage
-
-
 #the toppest make commands
 
-.PHONY: build prepare patch all clean distclean install purge help
-all: boot kernel rootfs component
-build: prepare patch config
-prepare: dir-prepare boot-prepare kernel-prepare rootfs-prepare component-prepare 
-patch: boot-patch kernel-patch rootfs-patch component-patch 
-config: rootfs-config component-config
-clean: boot-clean kernel-clean rootfs-clean component-clean
-distclean: boot-distclean kernel-distclean rootfs-distclean component-distclean
-install: boot-install kernel-install rootfs-install  component-install rootbox-install 
-purge: purge-confirm boot-purge kernel-purge rootfs-purge component-purge drv-purge rootbox-purge 
-
-.PHONY: purge-confirm dir-prepare
-purge-confirm:
-	read -p "Are you sure you to rm all project[yes/no]?" REPLY; \
-	if [ "$$REPLY" != "yes" ]; then \
-		exit 1; \
-	else \
-		echo "continue to start"; \
-	fi
-
-dir-prepare:
-	mkdir -p $(INSTALL_DIR)	
+.PHONY: prepare all clean distclean install help
+all: boot kernel buildroot drv
+clean: boot-clean kernel-clean buildroot-clean drv-clean
+install: boot-install kernel-install drv-install
 
 #====================================================================================
 #                          boot
 #====================================================================================
 
-.PHONY: boot-prepare boot-git-pre boot-patch boot boot-install boot-clean boot-distclean boot-purge boot-img
+.PHONY: boot-prepare boot-git-pre boot-patch boot boot-install boot-clean boot-distclean boot-img
 boot-prepare:
 	test -d $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT) || tar -xvf $(TOP_DIR)/source/$(BOOT_DIR).tar.gz -C $(TOP_DIR)/uboot; \
     	cd uboot; \
@@ -72,12 +50,10 @@ boot-clean:
 	make -C $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT) clean
 boot-distclean:
 	make -C $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT) distclean
-boot-purge:
-	rm -rf $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT)
 #====================================================================================
 #                          kernel
 #====================================================================================
-.PHONY: kernel-prepare kernel-git-pre  kernel-patch kernel kernel-install kernel-clean kernel-distclean kernel-purge
+.PHONY: kernel-prepare kernel-git-pre  kernel-patch kernel kernel-install kernel-clean kernel-distclean 
 
 kernel-prepare:
 	test -d $(TOP_DIR)/kernel/$(KERNEL_BRA) || unzip $(TOP_DIR)/source/$(KERNEL_BRA)-$(KERNEL_COMMIT).zip -d $(TOP_DIR)/kernel;
@@ -98,111 +74,32 @@ kernel-clean:
 	make -C $(TOP_DIR)/kernel/$(KERNEL_BRA) clean
 kernel-distclean:
 	make -C $(TOP_DIR)/kernel/$(KERNEL_BRA) distclean
-kernel-purge:
-	rm -rf $(TOP_DIR)/kernel/$(KERNEL_BRA)
-
-
-#====================================================================================
-#                          rootfs
-#====================================================================================
-.PHONY: rootfs-prepare rootfs-patch rootfs-config  rootfs  rootfs-clean rootfs-distclean  \
-    	rootfs-install  rootfs-uninstall rootfs-purge
-#++++++++++++++++++++++++++++++++++++++++++++++++++++
-rootfs-prepare:
-	make -C $(ROOTFS_SRC_DIR) prepare
-rootfs-patch:
-	make -C $(ROOTFS_SRC_DIR) patch
-rootfs-config:
-	make -C $(ROOTFS_SRC_DIR) config
-rootfs:
-	make -C $(ROOTFS_SRC_DIR) all
-rootfs-install:
-	make -C $(ROOTFS_SRC_DIR) install
-rootfs-clean:
-	make -C $(ROOTFS_SRC_DIR) clean
-rootfs-distclean:
-	make -C $(ROOTFS_SRC_DIR) distclean
-rootfs-purge:
-	make -C $(ROOTFS_SRC_DIR) purge
 
 #===================================================================================
 #			skdrv
 #===================================================================================
-.PHONY: drv drv-install drv-clean drv-purge
+.PHONY: drv drv-install drv-clean 
 
 drv:
 	make -C $(SKDRV_DIR) all
 
 drv-install:
-	mkdir -p $(ROOT_DEVEL_DIR)/usr/sklib
+	mkdir -p $(BUILDROOT_STAGE)/usr/sklib
 	make -C $(SKDRV_DIR) install
 
 drv-clean:
 	make -C $(SKDRV_DIR) clean
 
-drv-purge: drv-clean
-
 #====================================================================================
-#                          rootbox
+#                         buildroot-2016.11
 #====================================================================================
-.PHONY: rootfs-cp rootbox-install rootbox-purge 
-
-#cp syslib and usrlib to pub rootbox
-#install install and petalinux-prebuild dir to pub-rootbox
-rootfs-cp:
-	mkdir -p $(PUB_ROOTBOX)
-	cd $(PUB_ROOTBOX);\
-	mkdir -p home/root bin sbin lib usr/lib dev etc/init.d mnt opt proc root sys tmp var
-	rsync -arv $(ROOTBOX_PATCH_DIR)/etc $(PUB_ROOTBOX)/
-	#cp petalinux prebuild lib to pub rootbox
-	rsync -arv --exclude=*.a --exclude=*.prl --exclude=depmod.d --exclude=modprobe.d --exclude=pkgconfig \
-	    --exclude=security --exclude=udev $(PETALINUX_STAGE)/lib/ $(PUB_ROOTBOX)/lib/
-	rsync -arv $(PETALINUX_STAGE)/usr/lib/ $(PUB_ROOTBOX)/usr/lib/
-	#cp all target usr to pub rootbox	
-	rsync -arv --exclude=*.la --exclude=pkgconfig --exclude=*.a --exclude=include --exclude=*.prl \
-	    --exclude=share --exclude=cmake --exclude=udev --exclude=print-camera* --exclude=mkspecs \
-	    --exclude=features --exclude=doc --exclude=etc \
-		$(INSTALL_DIR)/usr/ $(PUB_ROOTBOX)/usr/
-	#start to install include and lib for app develop
-	mkdir -p $(ROOT_DEVEL_DIR)/usr/lib
-	rsync -arv $(PUB_ROOTBOX)/lib $(ROOT_DEVEL_DIR)/
-	rsync -arv $(PUB_ROOTBOX)/usr/lib $(ROOT_DEVEL_DIR)/usr/
-	rsync -arv $(INSTALL_DIR)/usr/include $(ROOT_DEVEL_DIR)/usr/
-	rsync -arv $(PETALINUX_STAGE)/usr/include/ $(ROOT_DEVEL_DIR)/usr/include/
-
-rootbox-install: rootfs-install rootfs-cp drv-install
-
-rootbox-purge:
-	rm -rf $(PUB_ROOTBOX)
-	rm -rf $(ROOT_DEVEL_DIR)
-	rm -rf $(INSTALL_DIR)
-	
-#====================================================================================
-#                         component
-#====================================================================================
-.PHONY:  component-prepare component-config component-patch component  component-clean  component-install \
-    	 component-purge component-test
+.PHONY:  buildroot buildroot-clean
 #++++++++++++++++++++++++++++++++++++++++++++++++++++
+buildroot:
+	make -C $(BUILDROOT_DIR)
+buildroot-clean:
+	make -C $(BUILDROOT_DIR) clean
 
-component-prepare:
-	make -C $(COMPONENT_DIR) prepare
-component-config:
-	make -C $(COMPONENT_DIR) config
-component-patch:
-	make -C $(COMPONENT_DIR) patch
-component:
-	make -C $(COMPONENT_DIR) all
-component-clean:
-	make -C $(COMPONENT_DIR) clean
-component-install:
-	make -C $(COMPONENT_DIR) install
-component-uninstall:
-	make -C $(COMPONENT_DIR) uninstall
-component-purge:
-	make -C $(COMPONENT_DIR) purge
-component-test:
-	make -C $(COMPONENT_DIR) test
-	
 .PHONY: nfs-install
 nfs-install:
 	sudo rsync -arv $(PUB_ROOTBOX)  $(NFS_BOOT)/
@@ -214,5 +111,4 @@ help:
 	@echo "make config . config all project"
 	@echo "make patch  . do all patches. all modified files in patch dir"
 	@echo "make install . install all share lib that was complied before to pub/rootbox"
-	@echo "make purge   . rm all source project. do it carefully. it would rm all workspace."
 	@echo "make clean distclean. to clean all project. it's little usage."	

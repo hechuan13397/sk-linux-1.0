@@ -31,7 +31,7 @@
 
 //#define LINUX_IO_TEST
 //#define IIC_LOOP_TEST
-//#define IIC_TURN_OFF
+#define IIC_TURN_OFF
 #define WITH_SUBDEV
 
 #define KER_LOG(formt,args...)         printk(KERN_INFO"%s-%d :: "formt,__FUNCTION__,__LINE__,##args);

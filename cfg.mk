@@ -28,16 +28,18 @@ CFG_FFMPEG_SUPPORT=yes
 #to silent receipt echo
 Q=@
 
+BUILDROOT_DIR=${ROOT_DIR}/buildroot-2016.11
 TOP_DIR=$(ROOT_DIR)
 ROOTFS_SRC_DIR=${ROOT_DIR}/rootfs
 PUB_ROOTBOX=${ROOT_DIR}/pub/rootbox
+BUILDROOT_TARGET=${BUILDROOT_DIR}/output/target/
 PUB_IMG_DIR=${ROOT_DIR}/pub/img
 ROOT_DEVEL_DIR=$(ROOT_DIR)/pub/sk-devel
+BUILDROOT_STAGE=${BUILDROOT_DIR}/output/staging
 COMPONENT_DIR=${ROOT_DIR}/component
 SKDRV_DIR=$(ROOT_DIR)/sk-drv
 PATCH_DIR=${ROOT_DIR}/patch
 ROOTBOX_PATCH_DIR=$(PATCH_DIR)/rootfs
-INSTALL_DIR = $(ROOT_DIR)/output/target
 SOURCE_DIR=$(ROOT_DIR)/source
 PETALINUX_DIR=$(ROOT_DIR)/petalinux
 
