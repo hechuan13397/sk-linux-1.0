@@ -1,18 +1,12 @@
 
 #makefile for component submodule
 
-
 include ../cfg.mk
-
 
 #qt variable
 QT_DIR = qt-everywhere-opensource-src-5.6.0
 QMAKE_BIN = $(COMPONENT_DIR)/$(QT_DIR)/qtbase/bin/qmake
 QWT_DIR = qwt-6.1.3
-QT_INSTALL_DIR = $(ROOT_DIR)/sys-root/install
-#PETA_LINUX_DIR = /home/hechuan/work/zynq/petalinux/test/Avnet-Digilent-ZedBoard-2016.2/build/linux/rootfs/stage
-SYS_ROOT_DIR = $(ROOT_DIR)/sys-root
-
 
 #ffmpeg variable 
 FFMPEG_DIR = ffmpeg-3.1.3
@@ -27,11 +21,41 @@ LIBUSB_DIR = libusb-1.0.18
 #libtslib dir variable
 TSLIB_DIR = tslib-1.1
 
+GUTEN_DIR=gutenprint-5.2.11
+#common unix print system
+CUPS_DIR=cups-release-2.1.4
+
+#variable asign by cfg
+QT_VERBOSE=yes
+
+MODULES= tslib qt qwt libtool libusb gphoto
+
+ifeq ($(CFG_FFMPEG_SUPPORT),yes)
+MODULES += ffmpeg
+endif
+
+ifeq ($(CFG_PRINTER_SUPPORT),yes)
+MODULES += printer
+endif
+
+MODULES_PRE=$(addsuffix -prepare,$(MODULES))
+MODULES_PAT=$(addsuffix -patch,$(MODULES))
+MODULES_CFG=$(addsuffix -config,$(MODULES))
+MODULES_INS=$(addsuffix -install,$(MODULES))
+MODULES_CLEAN=$(addsuffix -clean,$(MODULES))
+MODULES_DIST_CLEAN=$(addsuffix -distclean,$(MODULES))
+MODULES_PURGE=$(addsuffix -purge,$(MODULES))
 
 #all project do real make
-.PHONY: qt qwt ffmpeg libtool libusb gphoto
-all: tslib qt qwt ffmpeg libtool libusb gphoto
+.PHONY: $(MODULES)
+all: $(MODULES)
 
+printer: cups gutenprint
+
+gutenprint: cups-install
+	make -C $(GUTEN_DIR)
+cups:
+	make -C $(CUPS_DIR)
 qt: 
 	make -C $(QT_DIR) -j 4
 qwt:
@@ -60,9 +84,15 @@ test:
 	@echo "reply confirmed ok"
 
 #all project prepare
-.PHONY: tslib-prepare qt-prepare qwt-prepare ffmpeg-prepare libtool-prepare libusb-prepare gphoto-prepare
-prepare: tslib-prepare qt-prepare qwt-prepare ffmpeg-prepare libtool-prepare libusb-prepare gphoto-prepare
+.PHONY: $(MODULES_PRE)
+prepare: $(MODULES_PRE)
 
+printer-prepare: cups-prepare gutenprint-prepare
+
+cups-prepare:
+	test -d $(CUPS_DIR) || tar -xvf $(SOURCE_DIR)/$(CUPS_DIR).tar.gz
+gutenprint-prepare:
+	test -d $(GUTEN_DIR) || tar -xvf $(SOURCE_DIR)/$(GUTEN_DIR).tar.bz2
 ffmpeg-prepare:
 	test -d $(FFMPEG_DIR) || tar -xvf $(SOURCE_DIR)/$(FFMPEG_DIR).tar.bz2
 qt-prepare:
@@ -78,53 +108,89 @@ libusb-prepare:
 tslib-prepare:
 	test -d $(TSLIB_DIR) || tar -xvf $(SOURCE_DIR)/$(TSLIB_DIR).tar.gz
 
-#all project patch
-.PHONY: qt-patch qwt-patch
-patch: qt-patch qwt-patch
 
+#all project patch
+.PHONY: $(MODULES_PAT)
+patch: $(MODULES_PAT)
+
+printer-patch: cups-patch gutenprint-patch
+cups-patch:
+	test ! -d $(PATCH_DIR)/buildroot-2016.11/package/$(CUPS_DIR) || \
+	cp -rvf  $(PATCH_DIR)/buildroot-2016.11/package/$(CUPS_DIR)/. $(CUPS_DIR)/
+gutenprint-patch:
+	test ! -d $(PATCH_DIR)/buildroot-2016.11/package/$(GUTEN_DIR) || \
+	cp -rvf  $(PATCH_DIR)/buildroot-2016.11/package/$(GUTEN_DIR)/. $(GUTEN_DIR)/
+tslib-patch:
 qt-patch:
 	echo "$(PATCH_DIR)"
 	test ! -d $(PATCH_DIR)/qt/$(QT_DIR) || \
 	cp -rvf  $(PATCH_DIR)/qt/$(QT_DIR)/. $(QT_DIR)/
-
 qwt-patch:
 	echo "$(PATCH_DIR)"
 	test ! -d $(PATCH_DIR)/qt/$(QWT_DIR) || \
 	cp -rvf  $(PATCH_DIR)/qt/$(QWT_DIR)/. $(QWT_DIR)/
+ffmpeg-patch:
+libtool-patch:
+libusb-patch:
+gphoto-patch:
 
-	
 #all project config
-.PHONY: tslib-config qt-config qwt-config ffmpeg-config libtool-config libusb-config gphoto-config
-config: tslib-config qt-config qwt-config ffmpeg-config libtool-config libusb-config gphoto-config
+.PHONY: $(MODULES_CFG)
+config: $(MODULES_CFG)
+
+printer-config: cups-config gutenprint-config
+
+#--with-sysroot="$(INSTALL_DIR)"
+#--prefix=$(INSTALL_DIR)
+gutenprint-config:
+	cd $(GUTEN_DIR); \
+	aclocal && automake; \
+	./configure --prefix=/usr \
+	CFLAGS=-I$(INSTALL_DIR)/usr/include --host=$(CROSS_HOST) \
+	LDFLAGS="-L$(INSTALL_DIR)/usr/lib -L$(INSTALL_DIR)/usr/lib" \
+	--disable-libgutenprintui2 \
+	--disable-samples \
+	--without-doc \
+	--without-gimp2 \
+	--without-foomatic \
+	--without-foomatic3 \
+	--disable-escputil \
+	--disable-test \
+	--disable-testpattern \
+    	--disable-cups-ppds \
+	--disable-static
+
+cups-config:
+	cd $(CUPS_DIR); \
+	aclocal  -I config-scripts && autoconf -I config-scripts; \
+	./configure --host=$(CROSS_HOST) LDFLAGS=-L$(INSTALL_DIR)/usr/lib \
+	--libdir=/usr/lib --disable-libusb --disable-static --disable-dbus --disable-systemd
 
 tslib-config:
 	cd $(TSLIB_DIR); \
 	autoreconf -vfi; \
-	./configure --prefix=$(INSTALL_DIR) --host=$(CROSS_HOST)
+	./configure --prefix=$(INSTALL_DIR)/usr --host=$(CROSS_HOST)
 libtool-config:
 	cd $(LIBTOOL_DIR); \
-	./configure --prefix=$(INSTALL_DIR) --host=$(CROSS_HOST)
+	./configure --prefix=$(INSTALL_DIR)/usr --host=$(CROSS_HOST)
 libusb-config:
 	cd $(LIBUSB_DIR); \
-	./configure --prefix=$(INSTALL_DIR) --host=$(CROSS_HOST) --disable-udev
+	./configure --prefix=$(INSTALL_DIR)/usr --host=$(CROSS_HOST) --disable-udev
 
 gphoto-config: libtool-install libusb-install
 	cd $(GPHOTO_DIR); \
 	autoreconf --install --symlink; \
-	./configure --prefix=$(INSTALL_DIR) --host=$(CROSS_HOST) \
+	./configure --prefix=$(INSTALL_DIR)/usr --host=$(CROSS_HOST) \
 	--with-camlibs=canon,ptp2 \
-	LIBLTDL=$(INSTALL_DIR)/lib/libltdl.so  LTDLINCL=-I$(INSTALL_DIR)/include \
-	LIBUSB1_LIBS=$(INSTALL_DIR)/lib/libusb-1.0.so  LIBUSB1_CFLAGS=-I$(INSTALL_DIR)/include/libusb-1.0
+	LIBLTDL=$(INSTALL_DIR)/usr/lib/libltdl.so  LTDLINCL=-I$(INSTALL_DIR)/usr/include \
+	LIBUSB1_LIBS=$(INSTALL_DIR)/usr/lib/libusb-1.0.so  LIBUSB1_CFLAGS=-I$(INSTALL_DIR)/usr/include/libusb-1.0
 
 ffmpeg-config:
 	cd $(FFMPEG_DIR); \
-	./configure --prefix=$(INSTALL_DIR) --enable-cross-compile --cross-prefix=${CROSS_COMPILE} --arch=armel --target-os=linux \
+	./configure --prefix=$(INSTALL_DIR)/usr --enable-cross-compile --cross-prefix=${CROSS_COMPILE} --arch=armel --target-os=linux \
     	--disable-indev=alsa --disable-outdev=alsa --disable-static --enable-shared --disable-ffprobe --disable-ffserver \
 	--disable-avfilter --disable-encoders --disable-hwaccels --disable-muxers --disable-bsfs --disable-protocols \
 	--disable-outdevs --disable-filters --disable-parsers 
-
-
-QT_VERBOSE=yes
 
 ifeq ($(QT_VERBOSE),yes)
 QT_LOG=-verbose
@@ -138,7 +204,7 @@ endif
 qt-config: tslib-install
 	cd $(QT_DIR);\
 	./configure -xplatform xilinx-arm-linux-gnueabihf-g++ \
-	-prefix $(QT_INSTALL_DIR) \
+	-prefix $(INSTALL_DIR)/usr \
 	-shared -no-pkg-config -opensource \
 	-confirm-license -no-c++11 -no-openssl -no-xinput2 -no-xcb-xlib \
 	-no-glib -no-mtdev -no-pch -no-dbus -no-xcb -no-directfb -no-kms \
@@ -165,8 +231,8 @@ qt-config: tslib-install
 	-nomake tests \
 	-nomake tools \
 	-nomake examples \
-	-I$(QT_INSTALL_DIR)/include \
-	-L$(QT_INSTALL_DIR)/lib \
+	-I$(INSTALL_DIR)/usr/include \
+	-L$(INSTALL_DIR)/usr/lib \
 	$(QT_LOG)
 
 qwt-config:
@@ -174,8 +240,14 @@ qwt-config:
 	$(QMAKE_BIN) qwt.pro
 	
 #all project install
-.PHONY: tslib-install qt-install qwt-install ffmpeg-install libtool-install libusb-install gphoto-install
-install: tslib-install qt-install qwt-install ffmpeg-install libtool-install libusb-install gphoto-install
+.PHONY: $(MODULES_INS) 
+install: $(MODULES_INS)
+	
+printer-install: cups-install gutenprint-install
+gutenprint-install:
+	make -C $(GUTEN_DIR) install DESTDIR=$(INSTALL_DIR)
+cups-install:
+	make -C $(CUPS_DIR) install DESTDIR=$(INSTALL_DIR) DSTROOT=$(INSTALL_DIR)
 qt-install:
 	make -C $(QT_DIR) install
 qwt-install:
@@ -191,9 +263,14 @@ gphoto-install:
 tslib-install:
 	make -C $(TSLIB_DIR) install
 #all project clean
-.PHONY: tslib-clean qt-clean qwt-clean ffmpeg-clean libtool-clean libusb-clean gphoto-clean
-clean: tslib-clean qt-clean qwt-clean ffmpeg-clean libtool-clean libusb-clean gphoto-clean
+.PHONY: $(MODULES_CLEAN) 
+clean: $(MODULES_CLEAN) 
 
+printer-clean:cups-clean gutenprint-clean
+cups-clean:
+	make -C $(CUPS_DIR) clean
+gutenprint-clean:
+	make -C $(GUTEN_DIR) clean
 qt-clean:
 	make -C $(QT_DIR) clean
 qwt-clean:
@@ -210,9 +287,14 @@ tslib-clean:
 	make -C $(TSLIB_DIR) clean
 
 #all project distclean
-.PHONY: qt-distclean qwt-distclean ffmpeg-distclean libtool-distclean libusb-distclean gphoto-distclean
-distclean: qt-distclean qwt-distclean ffmpeg-distclean libtool-distclean libusb-distclean gphoto-distclean
+.PHONY: $(MODULES_DIST_CLEAN)
+distclean: $(MODULES_DIST_CLEAN)
 
+printer-distclean:cups-distclean gutenprint-distclean
+cups-distclean:
+	make -C $(CUPS_DIR) distclean
+gutenprint-distclean:
+	make -C $(GUTEN_DIR) distclean
 qt-distclean:
 	make -C $(QT_DIR) distclean
 qwt-distclean:
@@ -228,9 +310,15 @@ gphoto-distclean:
 tslib-distclean:
 	make -C $(TSLIB_DIR) distclean
 #all project purge
-.PHONY: tslib-purge qt-purge qwt-purge ffmpeg-purge libtool-purge libusb-purge gphoto-purge
-purge: tslib-purge qt-purge qwt-purge ffmpeg-purge libtool-purge libusb-purge gphoto-purge
+.PHONY: $(MODULES_PURGE)
+purge: $(MODULES_PURGE)
 
+printer-purge:gutenprint-purge cups-purge
+
+gutenprint-purge:
+	rm -rf $(GUTEN_DIR)
+cups-purge:
+	rm -rf $(CUPS_DIR)
 tslib-purge:
 	rm -rf $(TSLIB_DIR)	
 qt-purge:

@@ -1,0 +1,12 @@
+
+
+setenv ipaddr 192.168.1.108
+setenv serverip 192.168.1.101
+setenv gatewayip 192.168.1.1
+setenv netmask 255.255.255.0
+setenv kernel-image uImage
+setenv dtsfile zed-adv7511.dtb
+setenv rootpath /home/hechuan/work/nfsboot/rootbox
+setenv bootargs "consoleblank=0 vt.global_cursor_default=0 console=ttyPS0,115200 root=/dev/nfs rw nfsroot=${serverip}:${rootpath} ip=${ipaddr}:${serverip}:${gatewayip}:${netmask}:zynq:eth0:off nfsrootdebug cma=128M earlyprintk "
+tftpboot 0x300000 ${kernel-image};tftpboot 0x8300000 ${dtsfile}
+bootm 0x300000 - 0x8300000

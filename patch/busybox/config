@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Busybox version: 1.25.0
-# Mon Oct 17 16:28:27 2016
+# Wed Dec 14 18:30:08 2016
 #
 CONFIG_HAVE_DOT_CONFIG=y
 
@@ -738,10 +738,10 @@ CONFIG_DEVMEM=y
 CONFIG_EJECT=y
 CONFIG_FEATURE_EJECT_SCSI=y
 CONFIG_FBSPLASH=y
-# CONFIG_FLASHCP is not set
+CONFIG_FLASHCP=y
 # CONFIG_FLASH_LOCK is not set
 # CONFIG_FLASH_UNLOCK is not set
-# CONFIG_FLASH_ERASEALL is not set
+CONFIG_FLASH_ERASEALL=y
 CONFIG_IONICE=y
 # CONFIG_INOTIFYD is not set
 CONFIG_LAST=y

@@ -154,17 +154,20 @@ rootfs-cp:
 	cd $(PUB_ROOTBOX);\
 	mkdir -p home/root bin sbin lib usr/lib dev etc/init.d mnt opt proc root sys tmp var
 	rsync -arv $(ROOTBOX_PATCH_DIR)/etc $(PUB_ROOTBOX)/
+	#cp petalinux prebuild lib to pub rootbox
 	rsync -arv --exclude=*.a --exclude=*.prl --exclude=depmod.d --exclude=modprobe.d --exclude=pkgconfig \
 	    --exclude=security --exclude=udev $(PETALINUX_STAGE)/lib/ $(PUB_ROOTBOX)/lib/
 	rsync -arv $(PETALINUX_STAGE)/usr/lib/ $(PUB_ROOTBOX)/usr/lib/
-	rsync -arv --exclude=*.la --exclude=cmake --exclude=udev --exclude=*.a --exclude=*.prl\
-	    --exclude=print-camera* $(SYS_ROOT_DIR)/install/lib/ $(PUB_ROOTBOX)/usr/lib/
-	rsync -arv $(SYS_ROOT_DIR)/install/plugins $(PUB_ROOTBOX)/usr/lib/
+	#cp all target usr to pub rootbox	
+	rsync -arv --exclude=*.la --exclude=pkgconfig --exclude=*.a --exclude=include --exclude=*.prl \
+	    --exclude=share --exclude=cmake --exclude=udev --exclude=print-camera* --exclude=mkspecs \
+	    --exclude=features --exclude=doc --exclude=etc \
+		$(INSTALL_DIR)/usr/ $(PUB_ROOTBOX)/usr/
 	#start to install include and lib for app develop
 	mkdir -p $(ROOT_DEVEL_DIR)/usr/lib
 	rsync -arv $(PUB_ROOTBOX)/lib $(ROOT_DEVEL_DIR)/
 	rsync -arv $(PUB_ROOTBOX)/usr/lib $(ROOT_DEVEL_DIR)/usr/
-	rsync -arv $(SYS_ROOT_DIR)/install/include $(ROOT_DEVEL_DIR)/usr/
+	rsync -arv $(INSTALL_DIR)/usr/include $(ROOT_DEVEL_DIR)/usr/
 	rsync -arv $(PETALINUX_STAGE)/usr/include/ $(ROOT_DEVEL_DIR)/usr/include/
 
 rootbox-install: rootfs-install rootfs-cp drv-install

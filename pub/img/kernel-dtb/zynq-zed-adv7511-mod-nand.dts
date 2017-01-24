@@ -236,7 +236,7 @@
 			clock-names = "ref_clk", "pclk";
 			clocks = <&clkc 10>, <&clkc 43>;
 			compatible = "xlnx,zynq-qspi-1.0";
-			status = "okay";
+			status = "disabled";
 			interrupt-parent = <&intc>;
 			interrupts = <0 19 4>;
 			reg = <0xe000d000 0x1000>;
@@ -278,7 +278,7 @@
 		smcc: memory-controller@e000e000 {
 			#address-cells = <1>;
 			#size-cells = <1>;
-			status = "disabled";
+			status = "okay";
 			clock-names = "memclk", "aclk";
 			clocks = <&clkc 11>, <&clkc 44>;
 			compatible = "arm,pl353-smc-r2p1";
@@ -288,7 +288,7 @@
 			reg = <0xe000e000 0x1000>;
 
 			nand0: flash@e1000000 {
-				status = "disabled";
+				status = "okay";
 				compatible = "arm,pl353-nand-r2p1";
 				reg = <0xe1000000 0x1000000>;
 				#address-cells = <1>;
@@ -431,8 +431,8 @@
 			interrupts = <0 21 4>;
 			reg = <0xe0002000 0x1000>;
 			phy_type = "ulpi";
-			dr_mode = "peripheral";
-			xlnx,phy-reset-gpio = <&gpio0 85 0>;
+			//dr_mode = "peripheral";
+			//xlnx,phy-reset-gpio = <&gpio0 85 0>;
 		};
 
 		usb1: usb@e0003000 {
@@ -531,13 +531,6 @@
 				};
 			};
 
-			adau1761: adau1761@3b {
-				compatible = "adi,adau1761";
-				reg = <0x3b>;
-				clocks = <&audio_clock>;
-				clock-names = "mclk";
-				#sound-dai-cells = <0>;
-			};
 		};
 
 		axi_vdma_cap: axivdma0@43010000 {
@@ -615,81 +608,6 @@
 			};
 		};
 
-		audio_clock: audio_clock {
-			compatible = "fixed-clock";
-			#clock-cells = <0x0>;
-			clock-frequency = <0xbb8000>;
-		};
-
-		axi_spdif_tx_0: axi-spdif-tx@0x75c00000 {
-			compatible = "adi,axi-spdif-tx-1.00.a";
-			reg = <0x75c00000 0x1000>;
-			dmas = <&dmac_s 0>;
-			dma-names = "tx";
-			clocks = <&clkc 15>, <&audio_clock>;
-			clock-names = "axi", "ref";
-			#sound-dai-cells = <0>;
-		};
-
-		adv7511_hdmi_snd {
-			compatible = "simple-audio-card";
-			simple-audio-card,name = "HDMI monitor";
-			simple-audio-card,widgets = "Speaker", "Speaker";
-			simple-audio-card,routing = "Speaker", "TMDS";
-
-			simple-audio-card,dai-link@0 {
-				format = "spdif";
-				cpu {
-					sound-dai = <&axi_spdif_tx_0>;
-					frame-master;
-					bitclock-master;
-				};
-				codec {
-					sound-dai = <&adv7511>;
-				};
-			};
-		};
-
-		axi_i2s_0: axi-i2s@0x77600000 {
-			compatible = "adi,axi-i2s-1.00.a";
-			reg = <0x77600000 0x1000>;
-			dmas = <&dmac_s 1 &dmac_s 2>;
-			dma-names = "tx", "rx";
-			clocks = <&clkc 15>, <&audio_clock>;
-			clock-names = "axi", "ref";
-			#sound-dai-cells = <0>;
-		};
-
-		zed_sound {
-			compatible = "simple-audio-card";
-			simple-audio-card,name = "ZED ADAU1761";
-			simple-audio-card,widgets =
-				"Microphone", "Mic In",
-				"Headphone", "Headphone Out",
-				"Line", "Line In",
-				"Line", "Line Out";
-			simple-audio-card,routing =
-				"Line Out", "LOUT",
-				"Line Out", "ROUT",
-				"Headphone Out", "LHP",
-				"Headphone Out", "RHP",
-				"Mic In", "MICBIAS",
-				"LINN", "Mic In",
-				"RINN", "Mic In",
-				"LAUX", "Line In",
-				"RAUX", "Line In";
-			simple-audio-card,dai-link@0 {
-				format = "i2s";
-				cpu {
-					sound-dai = <&axi_i2s_0>;
-					frame-master;
-					bitclock-master;
-				};
-				codec {
-					sound-dai = <&adau1761>;
-				};
-			};
-		};
 	};
 
 	leds {
@@ -744,7 +662,7 @@
 };
 
 &nand0 {
-	status = "disabled";
+	status = "okay";
 	arm,nand-cycle-t0 = <0x4>;
 	arm,nand-cycle-t1 = <0x4>;
 	arm,nand-cycle-t2 = <0x1>;
@@ -775,30 +693,23 @@
 };
 
 /*add for uio test*/
+
+/*
+&amba {
+	ii2c@e0004000{
+		compatible = "dmem-uio";
+		reg = <0xe0004000 0x1000>;
+	};
+};
+*/
+
 &fpga_axi {
-
-	vdma@83000000 {
+	uio@77600000{
 		compatible = "dmem-uio";
-		reg = <0x83000000 0x6000>;
-	};
-
-	vtc@83c00000 {
-		compatible = "dmem-uio";
-		reg = <0x83c00000 0x6000>;
-	};
-
-	ad9361@79020000 {
-		compatible = "dmem-uio";
-		reg = <0x83c10000 0x6000>;
-	};
-
-	rx_dma@7c400000 {
-		compatible = "dmem-uio";
-		reg = <0x7c400000 0x10000>;
-		uio,number-of-dynamic-regions = <1>;
+		reg = <0x77600000 0x1000>;
+ 		uio,number-of-dynamic-regions = <1>;
 		uio,dynamic-regions-sizes = <262144>;
 	};
-
 };
 
 &i2c1 {

@@ -37,12 +37,24 @@
 #define UIO_SIZE "/sys/class/uio/uio0/maps/map0/size"
 #define UIO_SIZE_VTC "/sys/class/uio/uio1/maps/map0/size"
 
+#define TSC_EVENT "/dev/input/event0"
+
 int main( int argc, char **argv ) {
 	int uio_fd, uio_vtc_fd;
 	unsigned int uio_size, uio_vtc_size;
 	FILE *size_fp, *size_vtc_fp;
 	void *base_address;
 	void *base_vtc_address;
+
+	int event_fd = 0;
+	event_fd = open(TSC_EVENT, O_RDONLY);
+	if (!event_fd){
+		printf("open event_fd failed\n");
+		return 0;
+	}
+	
+	return 0;
+	
 
 	QV4l2Cap_CameraSet();
 

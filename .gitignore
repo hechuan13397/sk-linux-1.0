@@ -13,6 +13,8 @@ source/*
 sys-root/*
 tools/*
 uboot/*
+output/*
+buildroot-2016.11/*
 
 *.[do]
 *.a

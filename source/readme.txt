@@ -41,6 +41,8 @@ https://github.com/Digilent/u-boot-digilent/releases
 u-boot-xlnx-xilinx-v2016.3.tar.gz
 ----------------------------------------
 https://github.com/Xilinx/u-boot-xlnx/releases
+# make defconfig
+make zynq_zed_defconfig
 
 qwt-6.1.3.tar.bz2
 -----------------
@@ -49,3 +51,7 @@ https://sourceforge.net/projects/qwt/files/qwt/6.1.3/
 tslib-1.1.tar.gz
 ----------------
 https://github.com/kergoth/tslib/releases
+
+cups-release-2.1.4.tar.gz
+------------------------
+https://github.com/apple/cups/tags

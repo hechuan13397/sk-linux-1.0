@@ -14,6 +14,17 @@ ifeq ($(ROOT_DIR), )
 endif
 #$(warning rootdir = $(ROOT_DIR))
 
+#some project config define
+#gen boot with plbit
+CFG_BOOT_WITH_BIT=yes
+
+#compiling with linux printer support
+CFG_PRINTER_SUPPORT=yes
+#opencv support
+CFG_OPENCV_SUPPORT=yes 
+#ffmpeg for video process
+CFG_FFMPEG_SUPPORT=yes
+
 #to silent receipt echo
 Q=@
 
@@ -26,8 +37,7 @@ COMPONENT_DIR=${ROOT_DIR}/component
 SKDRV_DIR=$(ROOT_DIR)/sk-drv
 PATCH_DIR=${ROOT_DIR}/patch
 ROOTBOX_PATCH_DIR=$(PATCH_DIR)/rootfs
-SYS_ROOT_DIR=$(ROOT_DIR)/sys-root
-INSTALL_DIR = $(ROOT_DIR)/sys-root/install
+INSTALL_DIR = $(ROOT_DIR)/output/target
 SOURCE_DIR=$(ROOT_DIR)/source
 PETALINUX_DIR=$(ROOT_DIR)/petalinux
 

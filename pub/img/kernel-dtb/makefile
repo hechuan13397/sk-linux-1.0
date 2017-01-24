@@ -7,7 +7,6 @@ DTB_IMG=zed-adv7511
 #input dts file that we change with debug
 #DTB_INPUT_DTS=zynq-zed-adv7511-mod-mtm001-test.dts
 DTB_INPUT_DTS=zynq-zed-adv7511-mod-nand.dts
-
 #by this input file. we can review original dts file
 DTB_INPUT_DTB=$(DTB_IMG).dtb
 

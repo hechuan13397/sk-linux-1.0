@@ -62,6 +62,10 @@ More info, rerfer to petalinux guide.
 source /opt/petalinux/petalinux-v2016.2-final/settings.sh
 petalinux-create -t project -s <path-to-bsp>
 
+#Adv7511 zedboard hdl refercence design
+https://github.com/analogdevicesinc/hdl/releases
+https://wiki.analog.com/resources/tools-software/linux-drivers/platforms/zynq
+
 
 
 
