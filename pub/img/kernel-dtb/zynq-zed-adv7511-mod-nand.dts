@@ -192,7 +192,7 @@
 
 		uart0: serial@e0000000 {
 			compatible = "xlnx,xuartps", "cdns,uart-r1p8";
-			status = "disabled";
+			status = "okay";
 			clocks = <&clkc 23>, <&clkc 40>;
 			clock-names = "uart_clk", "pclk";
 			reg = <0xe0000000 0x1000>;

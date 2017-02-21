@@ -7,11 +7,11 @@ OBJ_DIR = obj
 
 CFLAGS= -c -Os -g -fomit-frame-pointer -pipe -fno-common -fno-builtin -Wall
 INCDIR += -I./v4l2cap
-MAIN_INSTALL = $(NFS_BOOT)/rootbox/home/root
+MAIN_INSTALL = $(NFS_BOOT)/rootbox/root
 
 LIBPATH = -L$(BUILDROOT_TARGET)/usr/lib
 LIBPATH += -L./v4l2cap
-SYS_LIBS = -lsk_v4l2cap
+SYS_LIBS = -lsk_v4l2cap -lmediactl -lv4l2subdev -ludev
 LIB = -Wl,--start-group $(SYS_LIBS) -Wl,--end-group
 
 OBJS = sk_v4l2test sk_uiotest

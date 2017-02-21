@@ -199,7 +199,7 @@ int main(int argc, char **argv)
 			return 0;
 	}
 
-	QV4l2Cap_CameraSet(500);
+	QV4l2Cap_CameraSet(100);
 
 	while (1){
 		
