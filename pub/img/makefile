@@ -4,13 +4,15 @@ include ../../cfg.mk
 
 #boot env txt. 
 #bootenv.img can be download by uboot when uboot boot up to cmdline.
-#uboot init first command line is in uEnv.txt that must be put in sd cards.
-BOOT_ENV=bootenv
+#uboot init first command line is in uEnv.txt which must be put in sd cards.
+#BOOT_ENV=bootenv-nfs
+BOOT_ENV=bootenv-nand
 BOOT_ENV_TXT=$(BOOT_ENV).txt
 BOOT_ENV_IMG=$(BOOT_ENV).img
+
 BOOT_COMPONENT_DIR=$(PUB_IMG_DIR)/plbit
 
-PL_VERSION=v1.0.0.3
+PL_VERSION=v1.0.0.4
 #PL_VERSION=v1.0
 FSBL=$(PUB_IMG_DIR)/plbit/fsbl-plbit-$(PL_VERSION)/fsbl.elf
 SYSBIT=$(PUB_IMG_DIR)/plbit/fsbl-plbit-$(PL_VERSION)/system.bit
@@ -20,7 +22,7 @@ LOGO_NAME=sk_log.png
 
 #petalinux project directory
 PETA_PROJECT_TMP=$(PETALINUX_DIR)/peta-zynq-tmp
-.PHONY:boot_env boot_img dtb dts kernel_logo sd_ramdisk_img
+.PHONY:boot_env boot_img dtb dts kernel_logo sd_ramdisk_img clean
 
 boot_env:
 	mkimage -T script -C none -n 'Demo Script File' -d $(BOOT_ENV_TXT) $(BOOT_ENV_IMG)
@@ -34,6 +36,7 @@ else
 	petalinux-package --boot --force --format BIN --fsbl $(FSBL) --uboot $(PUB_IMG_DIR)/plbit/u-boot.elf -o BOOT.bin -p $(PETA_PROJECT_TMP)
 endif
 	sudo cp -vf BOOT.bin $(NFS_BOOT)/rootbox/home/root/
+	sudo cp -vf BOOT.bin $(TFTP_HOST)
 	
 dtb:
 	make -C $(KERNEL_DTB_DIR) dtb
@@ -66,4 +69,7 @@ sd_ramdisk_img:
 		
 kernel_logo:
 	pngtopnm $(LOGO_NAME) | ppmquant 224 | pnmtoplainpnm > logo_linux_clut224.ppm
+
+clean:
+	rm -rvf $(PUB_ROOTBOX)
 

@@ -1,0 +1,3 @@
+
+bootcmd=setenv bootargs "console=ttyPS0,115200 root=/dev/ram rw earlyprintk";fatload mmc 0 0x8000 uImage;fatload mmc 0 0x800000 uramdisk.image.gz;fatload mmc 0 0x8000000 zed-adv7511.dtb;bootm 0x8000 0x800000 0x8000000
+uenvcmd=boot

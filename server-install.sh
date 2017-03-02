@@ -8,7 +8,13 @@ fi
 
 sudo cp -vf tools/gitbackup.sh /usr/sbin/
 sudo apt-get install device-tree-compiler autopoint libtool cmake u-boot-tools \
-    lib32ncurses5 lib32z1 lib32stdc++6 libncurses5-dev mtd-utils texinfo
+    lib32ncurses5 lib32z1 lib32stdc++6 libncurses5-dev mtd-utils texinfo tftpd-hpa
+
+# /etc/default/tftpd-hpa
+#TFTP_USERNAME="root"
+#TFTP_DIRECTORY="/home/ankur/tftpboot"
+#TFTP_ADDRESS="0.0.0.0:69"
+#TFTP_OPTIONS="-c --secure"
 
 echo "please add dir: /opt/tools/$LINARO_GCC/bin to your \$PATH
 	in /etc/profile or ~/bash.rc"

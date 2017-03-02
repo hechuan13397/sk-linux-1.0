@@ -1,8 +1,0 @@
-
-::sysinit:/etc/init.d/rcS
-# Start an askfirst shell on the serial ports
-::respawn:-/bin/sh
-# What to do when restarting the init process
-::restart:/sbin/init
-# What to do before rebooting
-::shutdown:/bin/umount -a -r

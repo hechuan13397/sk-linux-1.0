@@ -37,12 +37,7 @@ boot-patch:
 	cp -arvf $(BOOT_PAT_DIR)/. $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT)
 boot:
 	make -C $(TOP_DIR)/uboot/$(BOOT_DIR_SHORT) -j 4
-
-#this is only for test. 
-#it's need to set nfs rootfs/home dir to copy boot to sd 
-boot-img:
-	cd img/; \
-	./boot-make.sh
+	make -C $(PUB_IMG_DIR) boot_img
 
 boot-install:
 
@@ -66,8 +61,11 @@ kernel-patch:
 	cp -arvf $(PATCH_DIR)/kernel/. $(TOP_DIR)/kernel/$(KERNEL_BRA)
 
 kernel:
-	make -C $(TOP_DIR)/kernel/$(KERNEL_BRA) -j 4
-
+	cd $(TOP_DIR)/kernel/$(KERNEL_BRA); make -j 4; \
+	make uImage LOADADDR=0x300000; \
+	cp -vf  arch/arm/boot/uImage $(TFTP_HOST)/; \
+	cp -vf  arch/arm/boot/uImage $(PUB_IMG_DIR)/
+	
 kernel-install:
 
 kernel-clean:

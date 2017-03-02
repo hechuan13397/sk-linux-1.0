@@ -1,0 +1,12 @@
+
+
+setenv devicetree_load_address 0x2000000
+setenv kernel_load_address 0x2080000
+setenv kernel_size 0x500000
+setenv devicetree_size 0x20000
+setenv kernel-image uImage
+setenv dtsfile zed-adv7511.dtb
+setenv bootargs "consoleblank=0 vt.global_cursor_default=0 console=ttyPS1,115200 root=ubi0:rootfs rw ubi.mtd=4,2048 noinitrd rootfstype=ubifs rootwait=1 cma=128M earlyprintk"
+nand read ${devicetree_load_address} 0x600000 ${devicetree_size}
+nand read ${kernel_load_address} 0x700000 ${kernel_size}
+bootm ${kernel_load_address} - ${devicetree_load_address}
